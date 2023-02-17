@@ -46,7 +46,8 @@ class Complex {
      * @returns {Complex} 
      */
     divide(n) {
-        if (!(n instanceof Complex && !(n instanceof Number))) { throw new Error('Parameter is not a number.') }
+
+        if (!(n instanceof Complex) && (typeof n != 'number')) { throw new Error('Parameter is not a number.') }
         // (a + bi)/n = (a/n +b/n j)
         if (typeof(n) == 'number') {
             if (n == 0) { throw new Error('Cannot divide by zero.')}
