@@ -29,11 +29,11 @@
     </div>
     <div>
         <div class="menu">
-        <div class="wave-menu codingMenu" onmouseup="changeLineCoding('nrzm', this)"><h3>NRZ–M</h3><h4>Non-return-to-zero mark</h4></div>
-        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding('rtz', this)"><h3>RZ<h3><h4>Return to zero</h4></div>
-        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding('manchester', this)"><h3>Biphase–L</h3><h4>Manchester coding</h4></div>
-        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding('bipolar', this)"><h3>Bipolar</h3><h4>Duobinary signal</h4></div>
-        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding('mlt3', this)"><h3>MLT-3</h3><h4>Multi-Level Transmit</h4></div>
+        <div class="wave-menu codingMenu" onmouseup="changeLineCoding(nrzm, this)"><h3>NRZ–M</h3><h4>Non-return-to-zero mark</h4></div>
+        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding(returnToZero, this)"><h3>RZ<h3><h4>Return to zero</h4></div>
+        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding(manchester, this)"><h3>Biphase–L</h3><h4>Manchester coding</h4></div>
+        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding(bipolar, this)"><h3>Bipolar</h3><h4>Duobinary signal</h4></div>
+        <div class="wave-menu codingMenu notSelected" onmouseup="changeLineCoding(mlt3, this)"><h3>MLT-3</h3><h4>Multi-Level Transmit</h4></div>
         </div>
         <canvas onMouseOver="this.displayTimePeriod = true" onmouseout="this.displayTimePeriod = false" id="codingCanvas"></canvas>
         <br>
@@ -69,7 +69,7 @@
             <div class="input-menu" onmouseover="displayAllTimePeriods = false" onmouseout="displayAllTimePeriods = false">
                 <h3>Time period</h3>
                 <h4 id="TimePeriodLabel">\[T = 100\]</h4>
-                <input type="range" autocomplete="off" min="10" max="200" value="100" class="slider Wave2slider" id="dataWaveTimePeriod" oninput="dataWave.regenerateDataWithNewTimePeriod(Math.round(value)); value = Math.round(value); updateProbability(); document.getElementById('TimePeriodLabel').innerText = String.raw`\[T = ${value}\]`; MathJax.typeset();" style="margin-left:10px" ondblclick="value = 100; dataWave.regenerateDataWithNewTimePeriod(Math.round(value)); updateProbability(); document.getElementById('TimePeriodLabel').innerText = String.raw`\[T = ${value}\]`; MathJax.typeset();">
+                <input type="range" autocomplete="off" min="10" max="200" value="100" class="slider Wave2slider" id="dataWaveTimePeriod" oninput="dataWave.timePeriod = Math.round(value); value = Math.round(value); updateProbability(); document.getElementById('TimePeriodLabel').innerText = String.raw`\[T = ${value}\]`; MathJax.typeset(); dataWave.needsRefresh = true;" style="margin-left:10px" ondblclick="dataWave.timePeriod = Math.round(100); value = 100; updateProbability(); document.getElementById('TimePeriodLabel').innerText = String.raw`\[T = ${value}\]`; MathJax.typeset(); dataWave.needsRefresh = true;">
             </div>
             <label  class="input-menu checkbox_container">Show markings when hovering over the graphs
                 <input autocomplete = "off" type="checkbox" id="time_period_markings_enabled" name="time_period_markings_enabled" value="0" onclick="showMarkings=checked" checked>
@@ -79,10 +79,15 @@
         <div>
             <div class="input-menu" onmouseover="displayAllTimePeriods = false" onmouseout="displayAllTimePeriods = false">
                 <h3>Frequency threshold</h3>
-                <h4 id="FrequencyThresholdLabel">\[f = 50\]</h4>
-                <input type="range" autocomplete="off" min="5" max="300" value="50" class="slider Wave3slider" id="dataWaveFrequencyThreshold" oninput="dataWave.frequencyThreshold = Number(value); document.getElementById('FrequencyThresholdLabel').innerText = String.raw`\[f = ${value}\]`; MathJax.typeset(); dataWave.needsInverseFourierRefresh = true;" style="margin-left:10px" ondblclick="value = 50; document.getElementById('FrequencyThresholdLabel').innerText = String.raw`\[f = ${value}\]`; MathJax.typeset(); dataWave.needsInverseFourierRefresh = true;">
+                <h4 id="FrequencyThresholdLabel">\[f(k<50) = 0\]</h4>
+                <input type="range" autocomplete="off" min="5" max="300" value="50" class="slider Wave3slider" id="dataWaveFrequencyThreshold" oninput="dataWave.frequencyThreshold = Number(value); document.getElementById('FrequencyThresholdLabel').innerText = String.raw`\[f(k > ${value}) = 0\]`; MathJax.typeset(); dataWave.needsInverseFourierRefresh = true;" style="margin-left:10px" ondblclick="value = 50; document.getElementById('FrequencyThresholdLabel').innerText = String.raw`\[f(k > ${value}) = 0\]`; MathJax.typeset(); dataWave.needsInverseFourierRefresh = true; dataWave.frequencyThreshold = Number(value); ">
             </div>
         </div>
+    </div>
+    <div>
+        <div class="wave-menu"><h3>Eye Diagram</h3><h4></h4></div>
+        <canvas id="eyeDiagramCanvas" style="margin-left:30px;"></canvas>
+        <br>
     </div>
 </body>
 </html>

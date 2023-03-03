@@ -5,14 +5,13 @@
  * @param {DataWave} wave 
  */
 function returnToZero(wave) {
-    let i, j;
-    let returnToZeroData = new Array(wave.data.length).fill(0);
+    let i;
+    let returnToZeroData = new Array(wave.data.length*2).fill(false);
 
-    for (i=0; i < wave.data.length; i=i+wave.timePeriod) {
-        if (wave.getPositionAtTime(i)) {
-            for (j=0; j < wave.timePeriod/2; j++) {
-                returnToZeroData[i+j] = true;
-            }
+    for (i=0; i < wave.data.length; i++) {
+        if (wave.data[i]) {
+            returnToZeroData[i*2] = true;
+            returnToZeroData[i*2+1] = false;
         }
     }
     return returnToZeroData;
@@ -26,21 +25,13 @@ function returnToZero(wave) {
 function manchester(wave) {
     let manchesterData = new Array(wave.data.length).fill(0);
 
-    for (i=0; i < wave.data.length; i=i+wave.timePeriod) {
-        if (wave.getPositionAtTime(i)) {
-            for (j=0; j < wave.timePeriod/2; j++) {
-                manchesterData[i+j] = true;
-            }
-            for (j=Math.floor(wave.timePeriod/2); j < wave.timePeriod; j++) {
-                manchesterData[i+j] = false;
-            }
+    for (i=0; i < wave.data.length; i++) {
+        if (wave.data[i]) {
+            manchesterData[i*2] = true;
+            manchesterData[i*2+1] = false;
         } else {
-            for (j=0; j < wave.timePeriod/2; j++) {
-                manchesterData[i+j] = false;
-            }
-            for (j=Math.floor(wave.timePeriod/2); j < wave.timePeriod; j++) {
-                manchesterData[i+j] = true;
-            }
+            manchesterData[i*2] = false;
+            manchesterData[i*2+1] = true;
         }
     }
     return manchesterData;
@@ -54,26 +45,20 @@ function manchester(wave) {
 function nrzm(wave) {
     let nrzmData = new Array(wave.data.length).fill(false);
 
-    let i, j;
+    let i;
 
-    nrzmData[0] = 0
+    nrzmData[0] = wave.data[0]
 
-    for (i=1; i < wave.data.length; i=i+wave.timePeriod) {
-        if (wave.getPositionAtTime(i)) {
+    for (i=1; i < wave.data.length; i++) {
+        if (wave.data[i]) {
             if (nrzmData[i-1]) {
-                for (j=0; j < wave.timePeriod; j++) {
-                    nrzmData[i+j] = false;
-                }
+                nrzmData[i] = false;
             } else {
-                for (j=0; j < wave.timePeriod; j++) {
-                    nrzmData[i+j] = true;
-                }
+                nrzmData[i] = true;
             }
         } else {
             let oldData = nrzmData[i-1];
-            for (j=0; j < wave.timePeriod; j++) {
-                nrzmData[i+j] = oldData;
-            }
+            nrzmData[i] = oldData;
         }
     }
     return nrzmData;
@@ -90,23 +75,16 @@ function bipolar(wave) {
 
     let alternator = true;
 
-    for (i=0; i < wave.data.length; i=i+wave.timePeriod) {
-        if (wave.getPositionAtTime(i)) {
-            for (j=0; j < wave.timePeriod/2; j++) {
-                if (alternator) {
-                    bipolarData[i+j] = 1;
-                } else {
-                    bipolarData[i+j] = 0;
-                }
+    for (i=0; i < wave.data.length; i++) {
+        if (wave.data[i]) {
+            if (alternator) {
+                bipolarData[i] = 1;
+            } else {
+                bipolarData[i] = 0;
             }
             alternator = !alternator;
-            for (j=Math.floor(wave.timePeriod/2); j < wave.timePeriod; j++) {
-                bipolarData[i+j] = 0.5;
-            }
         } else {
-            for (j=0; j < wave.timePeriod; j++) {
-                bipolarData[i+j] = 0.5;
-            }
+            bipolarData[i] = 0.5;
         }
     }
     return bipolarData;
@@ -117,29 +95,24 @@ function bipolar(wave) {
  * Moves between -1 0 +1 0 on every high bit and remains constant on a zero bit
  * @param {DataWave} wave 
  */
-function MLT3(wave) {
+function mlt3(wave) {
     let mltData = new Array(wave.data.length).fill(0);
 
     let pattern = [0, 0.5, 1, 0.5];
     let currentPatternPosition = 0;
 
-    for (i=0; i < wave.data.length; i=i+wave.timePeriod) {
-        if (wave.getPositionAtTime(i)) {
-            for (j=0; j < wave.timePeriod; j++) {
-                mltData[i+j] = pattern[Math.floor(currentPatternPosition%4)];
-            }
+    for (i=0; i < wave.data.length; i++) {
+        if (wave.data[i]) {
+            mltData[i] = pattern[Math.floor(currentPatternPosition%4)];
             currentPatternPosition += 1;
         } else {
-            for (j=0; j < wave.timePeriod; j++) {
-                mltData[i+j] = pattern[Math.floor(currentPatternPosition%4)];
-            }
+            mltData[i] = pattern[Math.floor(currentPatternPosition%4)];
         }
     }
     return mltData;
 }
 
 function changeLineCoding(codingScheme, self) {
-    graphs[1].codingScheme = codingScheme;
 
     let menuItems = document.getElementsByClassName('codingMenu');
 
@@ -148,6 +121,6 @@ function changeLineCoding(codingScheme, self) {
     }
     self.classList.remove('notSelected');
 
-    dataWave.codingScheme = codingScheme;
+    dataWave.setCodingScheme( codingScheme);
     dataWave.needsRefresh = true;
 }

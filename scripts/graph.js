@@ -106,7 +106,6 @@ function plotDataWave(ctx, wave, codingScheme) {
 
         dataPoint = wave.getPositionAtTime(x, codingScheme)
         y = dataPoint*DATA_WAVE_SCALING_FACTOR;
-
         // This allows us to make the vertical lines straight
         if (dataPoint != prevDataPoint){
             ctx.lineTo(x-1,-y+height-10);
@@ -115,6 +114,33 @@ function plotDataWave(ctx, wave, codingScheme) {
         }
 
         prevDataPoint = wave.getPositionAtTime(x, codingScheme);
+    }
+
+    ctx.stroke();
+    ctx.save();
+}
+
+function plotEyeDiagram(ctx, wave) {
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+
+    ctx.lineWidth = 3;
+    
+    var y = 0;
+    ctx.beginPath();
+
+    let prevDataPoint = 0;
+    let dataPoint = 0;
+    for (let x = 0; x <= width; x = x + dataWave.timePeriod) {
+
+        for (let j = 0; j <= dataWave.timePeriod; j++) {
+
+            dataPoint = wave.getPositionAtTime(x+j, 'inverseFourier')
+            y = dataPoint*DATA_WAVE_SCALING_FACTOR;
+    
+            ctx.lineTo((j),-y+height-10);
+        }
+        ctx.moveTo(0,-y+height-10);
     }
 
     ctx.stroke();
@@ -136,7 +162,12 @@ function updateGraph(graph) {
     context.beginPath();
     context.strokeStyle = "rgb(128,128,128)";
 
-    plotDataWave(context, dataWave, graph.codingScheme);
+    if (graph.codingScheme == 'eyeDiagram') {
+        plotEyeDiagram(context, dataWave);
+    } else {
+        plotDataWave(context, dataWave, graph.codingScheme);
+    }
+    
 
     if ((graph.canvas.displayTimePeriod || displayAllTimePeriods) && showMarkings) {
         displayTimePeriod(graph.canvas);
@@ -162,7 +193,11 @@ graphs = [{
 {
     canvas: document.getElementById('inverseFourierCanvas'),
     codingScheme: "inverseFourier"
-}]
+},
+{
+    canvas: document.getElementById('eyeDiagramCanvas'),
+    codingScheme: "eyeDiagram"
+},]
 
 function updateGraphs() {
 
@@ -194,23 +229,21 @@ function displayTimePeriod(canvas) {
     ctx.strokeStyle = "#38a6ffaa";
 
     let i;
-    for (i=0; i<dataWave.data.length; i=i+dataWave.timePeriod) {
-        ctx.moveTo(i-1, height-DATA_WAVE_SCALING_FACTOR-10);
-        ctx.lineTo(i-1, height-10);
+    for (i=1; i<dataWave.data.length; i++) {
+        ctx.moveTo(i*dataWave.timePeriod-1, height-DATA_WAVE_SCALING_FACTOR-10);
+        ctx.lineTo(i*dataWave.timePeriod-1, height-10);
     }
     ctx.stroke();
     ctx.save();
 }
 
 function onClickGraph(event) {
-    // Find which time segment is being targetted
+    // Find which time segment is being targeted
     let timeSegment = Math.floor(event.clientX / dataWave.timePeriod);
 
     let i;
 
-    for (i = timeSegment*dataWave.timePeriod; i < timeSegment*dataWave.timePeriod + dataWave.timePeriod; i++) {
-        dataWave.data[i] = !dataWave.data[i];
-    }
+    dataWave.data[timeSegment] = !dataWave.data[timeSegment];
 
     dataWave.needsRefresh = true;
 

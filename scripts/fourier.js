@@ -64,4 +64,14 @@ function inverseFourierTransform(freqArray) {
   
     return timeArray;
 }
+
+function sampleData(data, samplesPerBit) {
+    let sampleData = [];
+    for (let i = 0; i< data.length; i++) {
+        for (let j = 0; j < samplesPerBit; j++) {
+            sampleData.push(data[i]);
+        }
+    }
+    return sampleData;
+}
     

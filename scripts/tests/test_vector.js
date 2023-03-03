@@ -1,5 +1,5 @@
 class TestVector {
-    constructor(object, parameters, expected_output) {
+    constructor(object=null, parameters=null, expected_output=null) {
         this.object = object;
         this.parameters = parameters;
         if (typeof(parameters) != 'Array') {

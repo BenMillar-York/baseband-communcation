@@ -1,4 +1,5 @@
 const pi = Math.PI;
+const SAMPLES_PER_BIT = 100;
 
 function ceiling(value){
     if (value < 0){
@@ -62,12 +63,8 @@ class DataWave {
         this.timePeriod = timePeriod;
         this.probability1 = 0.5;
         this.data = [];
-        this.returnToZeroData = [];
-        this.manchesterData = [];
-        this.nrzmData = [];
-        this.bipolarData = [];
-        this.fourierData = [];
-        this.codingScheme = 'nrzm';
+        this.codedData = [];
+        this.codingScheme = nrzm;
         this.currentCodingSchemeData = this.nrzmData;
         this.needsRefresh = true;
         this.initialised = false;
@@ -77,7 +74,7 @@ class DataWave {
         this.generateData();
     }
 
-    generateData() {
+    generateDataOld() {
         let dataPoint = 0;
         let i;
         dataPoint = Math.random() < roundedProbability;
@@ -88,13 +85,31 @@ class DataWave {
 
         this.generateCodingData();
     }
+    
+    generateData() {
+        let dataPoint = 0;
+
+        let dataLength = this.data.length;
+
+        let nextPowerOf2 = 16;
+
+        if (dataLength != 0) {
+            nextPowerOf2 = 2 ** (Math.ceil(Math.log2(dataLength))+1);
+        }
+        
+        console.log(dataLength, nextPowerOf2)
+
+        for (let i = dataLength; i < nextPowerOf2; i++) {
+            dataPoint = Math.random() < roundedProbability;
+            this.data.push(dataPoint);
+        }
+
+        this.generateCodingData();
+    }
+
 
     generateCodingData() {
-        this.returnToZeroData = returnToZero(this);
-        this.manchesterData = manchester(this);
-        this.nrzmData = nrzm(this);
-        this.bipolarData = bipolar(this);
-        this.mltData = MLT3(this);
+        this.codedData = this.codingScheme(this);
         
         if (this.fourierInitalised) {
             this.generateFourierData();
@@ -105,13 +120,7 @@ class DataWave {
     }
 
     generateFourierData() {
-        if (this.codingScheme == null) { this.currentCodingSchemeData = this.data;}
-        if (this.codingScheme == "rtz") { this.currentCodingSchemeData = this.returnToZeroData;}
-        if (this.codingScheme == "manchester") { this.currentCodingSchemeData = this.manchesterData;}
-        if (this.codingScheme == "nrzm") { this.currentCodingSchemeData = this.nrzmData;}
-        if (this.codingScheme == "bipolar") { this.currentCodingSchemeData = this.bipolarData;}
-        if (this.codingScheme == "mlt3") { this.currentCodingSchemeData = this.mltData;}
-        this.fourierData = discreteFourierTransform(this.currentCodingSchemeData);
+        this.fourierData = discreteFourierTransform(sampleData(this.codedData, SAMPLES_PER_BIT));
         this.generateInverseFourierData()
     }
 
@@ -127,7 +136,7 @@ class DataWave {
         this.needsInverseFourierRefresh = false;
     }
 
-    regenerateDataWithNewTimePeriod(newTimePeriod) {
+    /*regenerateDataWithNewTimePeriod(newTimePeriod) {
         let resampleData = [];
         let i, j;
         for (i = 0; i < this.data.length && i < window.innerWidth; i = i + this.timePeriod) {
@@ -138,7 +147,7 @@ class DataWave {
         this.data = resampleData;
         this.timePeriod = newTimePeriod;
         this.needsRefresh = true;
-    }
+    }*/
 
     recreateData() {
         this.data = [];
@@ -147,23 +156,18 @@ class DataWave {
     getPositionAtTime(time, coding=null) {
         if (!this.initialised) { return null; }
         if ((coding == 'fourier' || coding == 'inverseFourier') && this.fourierInitalised == false) { this.generateFourierData(); } 
-        if (time > this.data.length) {
+        if (Math.floor(time / this.timePeriod) > this.data.length) {
             this.generateData();
         }
 
-        if (coding == null) { return this.data[time];}
-        if (coding == "rtz") { return this.returnToZeroData[time];}
-        if (coding == "manchester") { return this.manchesterData[time];}
-        if (coding == "nrzm") { return this.nrzmData[time];}
-        if (coding == "bipolar") { return this.bipolarData[time];}
-        if (coding == "mlt3") { return this.mltData[time];}
-        if (coding == "fourier") { return Math.log10(this.fourierData[time].magnitude);}
-        if (coding == "inverseFourier") { return this.inverseFourierData[time].real * this.inverseFourierData.length;}
+        if (coding == null) { return this.data[Math.floor(time / this.timePeriod)];}
+        if (coding == 'inverseFourier') { 
+            let samplesPerBit = this.inverseFourierData.length / this.data.length;
+            let index = Math.floor(time /  this.timePeriod * samplesPerBit);
+            return this.inverseFourierData[index+1].real * this.inverseFourierData.length;
+        }   
+        return this.codedData[Math.floor(time / (this.timePeriod / (this.codedData.length / this.data.length)))];
         
-    }
-
-    onclick (event) {
-        console.log(event);
     }
 
     calculateProbabilityOf1 () {
@@ -177,6 +181,12 @@ class DataWave {
         }
         return total / dataWave.data.length
     }
+
+    setCodingScheme(codingFunction) {
+        this.codingScheme = codingFunction;
+    }
+
+    
 }
 
 class SumWave {

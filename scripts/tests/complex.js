@@ -1,4 +1,6 @@
-let multiply_test_vectors =  [
+let complex_test_vectors = {};
+
+complex_test_vectors.multiply =  [
     // [a, b, a*b]
     new TestVector(new Complex(1, 1), new Complex(1, 1), new Complex(0, 2)),
     new TestVector(new Complex(-5, 2), new Complex(3, -4), new Complex(-7, 26)),
@@ -7,7 +9,7 @@ let multiply_test_vectors =  [
     new TestVector(new Complex(-3490950, -54545), new Complex(3535, -3535), new Complex(-12533324825, 12147691675))
 ]
 
-let divide_test_vectors =  [
+complex_test_vectors.divide =  [
     // [a, b, a/b]
     new TestVector(new Complex(1, 1), new Complex(1, 1), new Complex(1, 0)),
     new TestVector(new Complex(-5, 2), new Complex(8, -4), new Complex(-0.8, -0.4666666666666667)),
@@ -16,5 +18,5 @@ let divide_test_vectors =  [
     new TestVector(new Complex(-3490950, -54545), new Complex(3535, -3535), new Complex(-972.3839841539332, -972.3839841539332))
 ]
 
-let TestMultiply = new UnitTest(Complex, 'multiply', multiply_test_vectors);
-let TestDivide = new UnitTest(Complex, 'divide', divide_test_vectors);
+new UnitTest(Complex, 'multiply', complex_test_vectors.multiply);
+new UnitTest(Complex, 'divide', complex_test_vectors.divide);
