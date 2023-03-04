@@ -129,18 +129,21 @@ function plotEyeDiagram(ctx, wave) {
     var y = 0;
     ctx.beginPath();
 
-    let prevDataPoint = 0;
     let dataPoint = 0;
-    for (let x = 0; x <= width; x = x + dataWave.timePeriod) {
+    for (let x = dataWave.timePeriod; x <= width; x = x + dataWave.timePeriod) {
 
-        for (let j = 0; j <= dataWave.timePeriod; j++) {
+        for (let j = 0; j <= dataWave.timePeriod*2; j++) {
 
-            dataPoint = wave.getPositionAtTime(x+j, 'inverseFourier')
+            dataPoint = wave.getPositionAtTime(x+(j-dataWave.timePeriod/2), 'inverseFourier')
             y = dataPoint*DATA_WAVE_SCALING_FACTOR;
     
-            ctx.lineTo((j),-y+height-10);
+            if (j == 0) {
+                ctx.moveTo((j),-y+height-10);
+            } else {
+                ctx.lineTo((j),-y+height-10);
+            }
+            
         }
-        ctx.moveTo(0,-y+height-10);
     }
 
     ctx.stroke();
