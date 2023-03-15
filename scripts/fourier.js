@@ -59,7 +59,7 @@ function inverseFourierTransform(freqArray) {
 
             timeSignal = addComplex(timeSignal, contribution)
         }
-        timeArray[k] = timeSignal.divide(N);
+        timeArray[k] = timeSignal.divide(N).real*N;
     }
   
     return timeArray;

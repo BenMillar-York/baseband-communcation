@@ -91,7 +91,7 @@ class DataWave {
 
         let dataLength = this.data.length;
 
-        let nextPowerOf2 = 16;
+        let nextPowerOf2 = 64;
 
         if (dataLength != 0) {
             nextPowerOf2 = 2 ** (Math.ceil(Math.log2(dataLength))+1);
@@ -132,6 +132,8 @@ class DataWave {
             data[i] = new Complex(0, 0);
         }
         this.inverseFourierData = inverseFourierTransform(data);
+        this.demodulatedSignal = this.demodulateSignal(this.inverseFourierData, null);
+
         this.fourierInitalised = true;
         this.needsInverseFourierRefresh = false;
     }
@@ -156,15 +158,29 @@ class DataWave {
     getPositionAtTime(time, coding=null) {
         if (!this.initialised) { return null; }
         if ((coding == 'fourier' || coding == 'inverseFourier') && this.fourierInitalised == false) { this.generateFourierData(); } 
-        if (Math.floor(time / this.timePeriod) > this.data.length) {
-            this.generateData();
+        if (Math.ceil(time / this.timePeriod) >= this.data.length) {
+            //this.generateData();
         }
 
         if (coding == null) { return this.data[Math.floor(time / this.timePeriod)];}
+        if (coding == 'demodulated') { return this.demodulatedSignal[Math.floor(time / this.timePeriod)];}
+        if (coding == 'fourier') { 
+
+            let data = [];
+            // Make a shallow copy of the array so we do not alter the original array
+            this.fourierData.forEach( dataPoint => { data.push(dataPoint); })
+
+            for (let i = this.frequencyThreshold; i < data.length - this.frequencyThreshold; i++) {
+                data[i] = new Complex(0,0);
+            }
+
+            let point = Math.log10(data[time].magnitude)/10+0.8;
+            return point;
+        }  
         if (coding == 'inverseFourier') { 
             let samplesPerBit = this.inverseFourierData.length / this.data.length;
             let index = Math.floor(time /  this.timePeriod * samplesPerBit);
-            return this.inverseFourierData[index+1].real * this.inverseFourierData.length;
+            return this.inverseFourierData[index+1];
         }   
         return this.codedData[Math.floor(time / (this.timePeriod / (this.codedData.length / this.data.length)))];
         
@@ -186,6 +202,19 @@ class DataWave {
         this.codingScheme = codingFunction;
     }
 
+    demodulateSignal(data, codingFunction) {
+        let plotPoints = []
+        let demodulatedSignal = []
+        for (let i = this.timePeriod/2; i < data.length; i = i + this.timePeriod) {
+            plotPoints.push(i);
+            let samplesPerBit = SAMPLES_PER_BIT;
+            let index = Math.floor(i /  this.timePeriod * samplesPerBit);
+            let signal = data[index+1];
+            demodulatedSignal.push(signal > 0.5);
+        }
+        this.plotPoints = plotPoints;
+        return demodulatedSignal;
+    }
     
 }
 

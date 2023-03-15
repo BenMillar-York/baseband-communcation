@@ -108,9 +108,9 @@ function plotDataWave(ctx, wave, codingScheme) {
         y = dataPoint*DATA_WAVE_SCALING_FACTOR;
         // This allows us to make the vertical lines straight
         if (dataPoint != prevDataPoint){
-            ctx.lineTo(x-1,-y+height-10);
+            ctx.lineTo(x-1,-y+height-20);
         } else {
-            ctx.lineTo(x,-y+height-10);
+            ctx.lineTo(x,-y+height-20);
         }
 
         prevDataPoint = wave.getPositionAtTime(x, codingScheme);
@@ -124,13 +124,14 @@ function plotEyeDiagram(ctx, wave) {
     var width = ctx.canvas.width;
     var height = ctx.canvas.height;
 
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     
     var y = 0;
     ctx.beginPath();
 
+
     let dataPoint = 0;
-    for (let x = dataWave.timePeriod; x <= width; x = x + dataWave.timePeriod) {
+    for (let x = dataWave.timePeriod; x <= dataWave.inverseFourierData.length; x = x + dataWave.timePeriod) {
 
         for (let j = 0; j <= dataWave.timePeriod*2; j++) {
 
@@ -138,9 +139,9 @@ function plotEyeDiagram(ctx, wave) {
             y = dataPoint*DATA_WAVE_SCALING_FACTOR;
     
             if (j == 0) {
-                ctx.moveTo((j),-y+height-10);
+                ctx.moveTo((j),-y+height-20);
             } else {
-                ctx.lineTo((j),-y+height-10);
+                ctx.lineTo((j),-y+height-20);
             }
             
         }
@@ -153,9 +154,9 @@ function plotEyeDiagram(ctx, wave) {
 let displayAllTimePeriods = false;
 let showMarkings = true;
 function updateGraph(graph) {
+
     graph.canvas.width = window.innerWidth;
     graph.canvas.height = window.innerHeight/8;
-
 
     var context = graph.canvas.getContext("2d");
 
@@ -174,6 +175,7 @@ function updateGraph(graph) {
 
     if ((graph.canvas.displayTimePeriod || displayAllTimePeriods) && showMarkings) {
         displayTimePeriod(graph.canvas);
+        //displayPlotPoints(graph.canvas);
     }
 
     context.restore();
@@ -189,10 +191,10 @@ graphs = [{
     canvas: document.getElementById('codingCanvas'),
     codingScheme: "nrzm"
 },
-/*{
+{
     canvas: document.getElementById('fourierCanvas'),
     codingScheme: "fourier"
-},*/
+},
 {
     canvas: document.getElementById('inverseFourierCanvas'),
     codingScheme: "inverseFourier"
@@ -200,7 +202,11 @@ graphs = [{
 {
     canvas: document.getElementById('eyeDiagramCanvas'),
     codingScheme: "eyeDiagram"
-},]
+},
+{
+    canvas: document.getElementById('demodulatedCanvas'),
+    codingScheme: "demodulated"
+}]
 
 function updateGraphs() {
 
@@ -233,8 +239,27 @@ function displayTimePeriod(canvas) {
 
     let i;
     for (i=1; i<dataWave.data.length; i++) {
-        ctx.moveTo(i*dataWave.timePeriod-1, height-DATA_WAVE_SCALING_FACTOR-10);
-        ctx.lineTo(i*dataWave.timePeriod-1, height-10);
+        ctx.moveTo(i*dataWave.timePeriod-1, height-DATA_WAVE_SCALING_FACTOR-20);
+        ctx.lineTo(i*dataWave.timePeriod-1, height-20);
+    }
+    ctx.stroke();
+    ctx.save();
+}
+
+function displayPlotPoints(canvas) {
+    let ctx = canvas.getContext("2d");
+
+    var height = ctx.canvas.height;
+
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#38a600aa";
+
+    let i;
+    for (i=0; i<dataWave.data.length; i++) {
+        ctx.moveTo(dataWave.plotPoints[i], height-DATA_WAVE_SCALING_FACTOR-20);
+        ctx.lineTo(dataWave.plotPoints[i], height-20);
     }
     ctx.stroke();
     ctx.save();

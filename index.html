@@ -38,21 +38,21 @@
         <canvas onMouseOver="this.displayTimePeriod = true" onmouseout="this.displayTimePeriod = false" id="codingCanvas"></canvas>
         <br>
     </div>
-    <!--<div>
+    <div>
         <div class="wave-menu"><h3>Spectral Density</h3><h4></h4></div>
         <canvas onMouseOver="this.displayTimePeriod = true" onmouseout="this.displayTimePeriod = false" id="fourierCanvas"></canvas>
         <br>
-    </div>-->
+    </div>
     <div>
         <div class="wave-menu"><h3>Inverse Fourier</h3><h4></h4></div>
         <canvas onMouseOver="this.displayTimePeriod = true" onmouseout="this.displayTimePeriod = false" id="inverseFourierCanvas"></canvas>
         <br>
     </div>
-    <!--<div>
-        <div class="wave-menu"><h3>Bipolar</h3><h4>Duobinary signal</h4></div>
-        <canvas onMouseOver="this.displayTimePeriod = true" onmouseout="this.displayTimePeriod = false" id="bipolarCodingCanvas"></canvas>
+    <div>
+        <div class="wave-menu"><h3>Demodulated Signal</h3></div>
+        <canvas onMouseOver="this.displayTimePeriod = true" onmouseout="this.displayTimePeriod = false" id="demodulatedCanvas"></canvas>
         <br>
-    </div>-->
+    </div>
 
     <br>
 
@@ -83,11 +83,14 @@
                 <input type="range" autocomplete="off" min="5" max="300" value="50" class="slider Wave3slider" id="dataWaveFrequencyThreshold" oninput="dataWave.frequencyThreshold = Number(value); document.getElementById('FrequencyThresholdLabel').innerText = String.raw`\[f(k > ${value}) = 0\]`; MathJax.typeset(); dataWave.needsInverseFourierRefresh = true;" style="margin-left:10px" ondblclick="value = 50; document.getElementById('FrequencyThresholdLabel').innerText = String.raw`\[f(k > ${value}) = 0\]`; MathJax.typeset(); dataWave.needsInverseFourierRefresh = true; dataWave.frequencyThreshold = Number(value); ">
             </div>
         </div>
+
+        <div style="margin-left: 20%">
+            <div class="input-menu"><h3>Eye Diagram</h3>
+            <canvas id="eyeDiagramCanvas" style="margin-left:30px;"></canvas>
+        </div>
     </div>
-    <div>
-        <div class="wave-menu"><h3>Eye Diagram</h3><h4></h4></div>
-        <canvas id="eyeDiagramCanvas" style="margin-left:30px;"></canvas>
-        <br>
-    </div>
+
+
+
 </body>
 </html>
